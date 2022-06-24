@@ -22,6 +22,7 @@ impl CampaignMenu {
             worlds: vec![
                 World::world1(),
                 World::world2(),
+                World::world3(),
             ],
         }
     }

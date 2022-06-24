@@ -13,6 +13,7 @@ pub enum Tile {
 pub enum Entity {
     Player,
     Present,
+    Crate,
     Receptacle,
 }
 
@@ -86,6 +87,14 @@ impl Level {
                     'B' => {
                         level.tiles[j*w + i] = Tile::Ice;
                         level.entities.push((Entity::Present, i as i32, j as i32));
+                    },
+                    'c' => {
+                        level.tiles[j*w + i] = Tile::Snow;
+                        level.entities.push((Entity::Crate, i as i32, j as i32));
+                    },
+                    'C' => {
+                        level.tiles[j*w + i] = Tile::Ice;
+                        level.entities.push((Entity::Crate, i as i32, j as i32));
                     },
                     _ => {
                         println!("forbidden chars in level!");

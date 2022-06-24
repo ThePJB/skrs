@@ -1,4 +1,5 @@
-use crate::{level::*, manifest::{noice_levels, ice_levels}};
+use crate::level::*;
+use crate::manifest::*;
 
 pub struct World {
     pub title: String,
@@ -34,5 +35,21 @@ impl World {
                 Level::from_string(ice_levels[7]).unwrap(),
             ], 
             completion: vec![false; 8] }
+    }
+    pub fn world3() -> World {
+        World {
+            title: "world3".to_owned(),
+            levels: vec![
+                Level::from_string(crate_levels[0]).unwrap(),
+                Level::from_string(crate_levels[1]).unwrap(),
+                Level::from_string(crate_levels[2]).unwrap(),
+                Level::from_string(crate_levels[3]).unwrap(),
+                Level::from_string(crate_levels[4]).unwrap(),
+                Level::from_string(crate_levels[5]).unwrap(),
+                Level::from_string(crate_levels[6]).unwrap(),
+                Level::from_string(crate_levels[7]).unwrap(),
+                Level::from_string(crate_levels[8]).unwrap(),
+            ], 
+            completion: vec![false; 9] }
     }
 }

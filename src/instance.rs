@@ -70,10 +70,11 @@ impl Instance {
                     Entity::Player => Rect::new(4.0, 0.0, 1.0, 1.0),
                     Entity::Present => Rect::new(3.0, 0.0, 1.0, 1.0),
                     Entity::Receptacle => Rect::new(5.0, 0.0, 1.0, 1.0),
+                    Entity::Crate => Rect::new(6.0, 0.0, 1.0, 1.0),
                 },
                 pos: level_rect.grid_child(*i, *j, self.level.w, self.level.h),
                 depth: match e {
-                    Entity::Player | Entity::Present => 2.0,
+                    Entity::Player | Entity::Present | Entity::Crate => 2.0,
                     Entity::Receptacle => 1.5,
                 },
             });

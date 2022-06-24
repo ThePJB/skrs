@@ -5,7 +5,11 @@
 lol it would be funny if the tiles all flew offscreen and reassembled the level
 tripper puzzle game. i reckon a cooler aesthetic is possible. trippy would be good for effects
 
+Pow box tho!!
+explode on push into wall? what about on slide into wall
+for deleting boxes, as a hazard
+
+maybe teach them the thing in a really obvious way, then make them find it when its not obvious: force to generalize
+
 ## Bugs
-* why sometimes receptacles not drawn if theres an entity on them, and sometimes they are
-* oh i probably need to sort my geometry, draw back to front
 * spurious gaps in renderer are yuck
