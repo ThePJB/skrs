@@ -336,8 +336,8 @@ impl Rect {
             // )
             
             Rect::new(
-                self.x + (self.w * x as f32) / w as f32,
-                self.y + (self.h * y as f32) / h as f32,
+                (self.x as f64 + (self.w as f64 * x as f64) / w as f64) as f32,
+                (self.y as f64 + (self.h as f64 * y as f64) / h as f64) as f32,
                 self.w / w as f32,
                 self.h / h as f32,
             )

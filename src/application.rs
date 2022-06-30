@@ -4,6 +4,7 @@ use crate::campaign_menu::CampaignMenu;
 use crate::lib::kinput::*;
 use crate::lib::kimg::*;
 use crate::renderer::*;
+use crate::session::*;
 use crate::instance::*;
 use crate::lib::kmath::*;
 use glutin::event::{Event, WindowEvent};
@@ -18,8 +19,9 @@ pub struct Application {
     pub xres: f32,
     pub yres: f32,
 
-    campaign_menu: CampaignMenu,
+    // campaign_menu: CampaignMenu,
     // instance: Instance,
+    session: Session,
 }
 
 pub fn load_file(paths: &[&str]) -> String {
@@ -64,7 +66,8 @@ impl Application {
             renderer,
             event_aggregator: EventAggregator::new(default_xres, default_yres),
 
-            campaign_menu: CampaignMenu::new(),
+            // campaign_menu: CampaignMenu::new(),
+            session: Session::new(),
 
             xres: default_xres,
             yres: default_yres,
@@ -92,9 +95,9 @@ impl Application {
 
             let mut rc = Vec::new();
 
-            self.campaign_menu.frame(&inputs, &mut rc);
+            self.session.frame(&inputs, &mut rc);
 
-            let atlas_rect = Rect::new(0.0, 0.0, 10.0, 10.0);
+            let atlas_rect = Rect::new(0.0, 0.0, 20.0, 10.0);
 
             rc.sort_by_key(|rc| OrderedFloat(rc.depth));
             self.renderer.draw(&self.gl, inputs.screen_rect, atlas_rect, &rc);

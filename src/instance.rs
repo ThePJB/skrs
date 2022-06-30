@@ -8,13 +8,13 @@ use crate::lib::kmath::*;
 
 // gameplay instance
 pub struct Instance {
-    pub level: Level,
+    pub level: LevelInstance,
 }
 
 impl Instance {
-    pub fn new() -> Instance {
+    pub fn new(level_instance: LevelInstance) -> Instance {
         Instance {
-            level: Level::from_string(noice_levels[0]).unwrap(),
+            level: level_instance,
         }
     }
 
@@ -42,43 +42,15 @@ impl Instance {
         if inputs.just_pressed(VirtualKeyCode::Space) || inputs.just_pressed(VirtualKeyCode::Return) {
             if self.level.victorious() {
                 return true;
-            } else {
-                std::process::exit(0);
             }
+        }
+        if inputs.just_pressed(VirtualKeyCode::Escape) {
+            std::process::exit(0);
         }
 
         // draw level
-        let level_rect = inputs.screen_rect.fit_aspect_ratio(self.level.w as f32 / self.level.h as f32);
-        for i in 0..self.level.w {
-            for j in 0..self.level.h {
-                rc.push(RenderCommand {
-                    colour: Vec4::new(1.0, 1.0, 1.0, 1.0),
-                    sprite_clip: match self.level.tiles[(j*self.level.w + i) as usize] {
-                        Tile::Snow => Rect::new(1.0, 0.0, 1.0, 1.0),
-                        Tile::Ice => Rect::new(2.0, 0.0, 1.0, 1.0),
-                        Tile::Wall => Rect::new(0.0, 0.0, 1.0, 1.0),
-                    },
-                    pos: level_rect.grid_child(i, j, self.level.w, self.level.h),
-                    depth: 1.0,
-                });
-            }
-        }
-        for (e, i, j) in self.level.entities.iter() {
-            rc.push(RenderCommand {
-                colour: Vec4::new(1.0, 1.0, 1.0, 1.0),
-                sprite_clip: match e {
-                    Entity::Player => Rect::new(4.0, 0.0, 1.0, 1.0),
-                    Entity::Present => Rect::new(3.0, 0.0, 1.0, 1.0),
-                    Entity::Receptacle => Rect::new(5.0, 0.0, 1.0, 1.0),
-                    Entity::Crate => Rect::new(6.0, 0.0, 1.0, 1.0),
-                },
-                pos: level_rect.grid_child(*i, *j, self.level.w, self.level.h),
-                depth: match e {
-                    Entity::Player | Entity::Present | Entity::Crate => 2.0,
-                    Entity::Receptacle => 1.5,
-                },
-            });
-        }
+        let level_rect = inputs.screen_rect.fit_aspect_ratio(self.level.l.w as f32 / self.level.l.h as f32);
+        self.level.render(level_rect, rc);
 
         return false;
     }

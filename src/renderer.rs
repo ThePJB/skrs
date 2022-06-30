@@ -8,6 +8,10 @@ use std::fmt;
 pub const DEPTH_WORLD_START: f32 = 2.0;
 pub const DEPTH_WORLD_END: f32 = 10.0;
 
+pub const text_clip: Rect = Rect {x: 0.0, y: 6.0, w: 14.0, h: 1.5};
+pub const text_aspect: f32 = 7./8.;
+
+
 #[derive(Clone, Copy, Debug)]
 pub struct RenderCommand {
     pub colour: Vec4,
@@ -22,12 +26,46 @@ impl RenderCommand {
         RenderCommand {
             colour,
             pos: r,
-            sprite_clip: Rect::new(9.0, 9.0, 1.0, 1.0).grid_child(2, 0, 10, 10),
+            sprite_clip: Rect::new(9.0, 9.0, 1.0, 1.0).grid_child(2, 0, 20, 10),
             depth,
         }
     }
 }
 
+pub fn render_text_left(s: &[u8], r: Rect, depth: f32, rc: &mut Vec<RenderCommand>) {
+    let mut char_rect = Rect::new(r.x, r.y, r.h * text_aspect, r.h);
+    for c in s {
+        let idx = c - b' ';
+        let x = idx % 32;
+        let y = idx / 32;
+        let char_clip = text_clip.grid_child(x as i32, y as i32, 32, 3);
+        rc.push(RenderCommand {
+            colour: Vec4::new(1.0, 1.0, 1.0, 1.0),
+            pos: char_rect,
+            sprite_clip: char_clip, 
+            depth,
+        });
+        char_rect.x += char_rect.w;
+    }
+}
+
+pub fn render_text_center(s: &[u8], r: Rect, depth: f32, rc: &mut Vec<RenderCommand>) {
+    let r = r.fit_aspect_ratio(s.len() as f32 * text_aspect);
+    let mut char_rect = Rect::new(r.x, r.y, r.h * text_aspect, r.h);
+    for c in s {
+        let idx = c - b' ';
+        let x = idx % 32;
+        let y = idx / 32;
+        let char_clip = text_clip.grid_child(x as i32, y as i32, 32, 3);
+        rc.push(RenderCommand {
+            colour: Vec4::new(1.0, 1.0, 1.0, 1.0),
+            pos: char_rect,
+            sprite_clip: char_clip, 
+            depth,
+        });
+        char_rect.x += char_rect.w;
+    }
+}
 
 pub struct Renderer {
     vbo: NativeBuffer,
