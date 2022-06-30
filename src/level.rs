@@ -1,18 +1,20 @@
 use crate::lib::kmath::*;
 use crate::renderer::*;
+use serde::{Serialize, Deserialize};
+
 
 // how am i going to do game logic and animate it?
 // store prev and new and lerp
 // allow player movement in next timesteps sure. it could be realtime lol.
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Tile {
     Snow,
     Ice,
     Wall,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Entity {
     Player,
     Present,
@@ -20,7 +22,8 @@ pub enum Entity {
     Receptacle,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
+
 pub struct Level {
     pub title: String,
     pub w: i32,

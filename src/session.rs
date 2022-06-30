@@ -7,6 +7,7 @@ use crate::level::*;
 use crate::instance::*;
 use crate::level_repository;
 use crate::level_repository::LevelRepository;
+use crate::level_repository::levels_path;
 use crate::renderer::*;
 use crate::manifest::*;
 use crate::lib::kinput::*;
@@ -43,7 +44,7 @@ impl Session {
         Session {
             name: "santa".to_owned(),
             date: "genesis".to_owned(),
-            level_repository: LevelRepository::new(),
+            level_repository: LevelRepository::load(levels_path).unwrap_or(LevelRepository::new()),
             completed_levels: HashSet::new(),
             current_level: Level::from_string(noice_levels[0]).unwrap(),
             current_instance: None,
@@ -61,7 +62,9 @@ impl Session {
         if let Some(ci) = &mut self.current_instance {
             // esc back to edit mode
 
-            ci.frame(inputs, rc);
+            if ci.frame(inputs, rc) {
+                self.current_instance = None;
+            }
         } else {
             let tiles = vec![Tile::Snow, Tile::Ice, Tile::Wall, Tile::Wall];
             let entities = vec![Entity::Player, Entity::Crate, Entity::Present, Entity::Receptacle];
@@ -170,6 +173,9 @@ impl Session {
                                 if self.terminal_str.starts_with("save ") && self.terminal_str.split(" ").count() == 2 {
                                     let level_name = self.terminal_str.split(" ").nth(1).unwrap().to_owned();
                                     self.level_repository.save_level(level_name, self.name.clone(), self.current_level.clone());
+                                }
+                                if self.terminal_str.starts_with("list") && self.terminal_str.split(" ").count() == 1 {
+                                    self.level_repository.print_levels();
                                 }
                                 if self.terminal_str.starts_with("dims ") && self.terminal_str.split(" ").count() == 3 {
                                     if let Ok(new_w) = self.terminal_str.split(" ").nth(1).unwrap().parse::<u32>() {

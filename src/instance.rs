@@ -45,7 +45,7 @@ impl Instance {
             }
         }
         if inputs.just_pressed(VirtualKeyCode::Escape) {
-            std::process::exit(0);
+            return true;
         }
 
         // draw level
