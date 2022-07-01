@@ -30,7 +30,7 @@ impl CampaignMenu {
     pub fn frame(&mut self, inputs: &FrameInputState, rc: &mut Vec<RenderCommand>) {
 
         if let Some(instance) = self.game_instance.as_mut() {
-            if instance.frame(inputs, rc) {
+            if instance.frame(inputs, rc, 0) {
                 // complete level
                 self.worlds[self.world_selection as usize].completion[self.level_selection as usize] = true;
                 if self.level_selection as usize == self.worlds[self.world_selection as usize].levels.len() - 1 {

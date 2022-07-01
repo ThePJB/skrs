@@ -32,6 +32,8 @@ and separate terminal function probably
 level repository save to disk
 
 
+next I guess we add portals and make levels!!
+and maybe tree and path and pow
 
 
 OK ive figured out structure of levels, worlds. have it be in engine constantly, global level registry, levels referenced by name
@@ -74,3 +76,23 @@ theorems
  * all at once send off
  * the corner one I dont like, it at least reads, how do I go back
     * could use present to prepare the thing to go back
+
+
+bug: possession mode: would actually be a great puzzle mechanic. just have a bunch of things interacting
+
+
+bug: level titles need to line up
+
+
+it would probably be more immersive if there was a 1:1 coro with going in/out of portals hey.
+or even no portals, going off edges in certain spots and just gates of certain requirement
+
+maybe there should be 'return portals': always free, always back wehre u came from
+
+some kind of ctx stack i guess
+
+it probably would look sick if tiles dissolved in and out
+portals should be super minimal, maybe only active if youre near as well
+green = level has been done
+
+certainly got some polishing to do

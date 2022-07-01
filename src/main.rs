@@ -5,7 +5,6 @@ mod manifest;
 mod level;
 mod instance;
 mod world;
-mod campaign_menu;
 mod session;
 mod level_repository;
 

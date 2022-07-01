@@ -1,6 +1,5 @@
 use glow::*;
 use ordered_float::OrderedFloat;
-use crate::campaign_menu::CampaignMenu;
 use crate::lib::kinput::*;
 use crate::lib::kimg::*;
 use crate::renderer::*;

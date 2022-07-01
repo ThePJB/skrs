@@ -31,6 +31,9 @@ pub struct Session {
     terminal_history: Vec<String>,
     terminal_str: String,
     history_idx: Option<i32>,
+
+    place_tokens: i32,
+    place_link: String,
 }
 
 // lol present is such a macguffin, I wouldn't mind if there was something that made sense to happen once they were on a specific square, and you got a specific outcome and that was progress
@@ -55,6 +58,9 @@ impl Session {
             terminal_history: Vec::new(),
             terminal_str: "".to_owned(),
             history_idx: None,
+
+            place_tokens: 0,
+            place_link: "void".to_owned(),
         }
     }
 
@@ -62,12 +68,17 @@ impl Session {
         if let Some(ci) = &mut self.current_instance {
             // esc back to edit mode
 
-            if ci.frame(inputs, rc) {
-                self.current_instance = None;
+            let outcome = ci.frame(inputs, rc, self.completed_levels.len() as i32);
+            println!("outcome: {:?}", outcome);
+            match outcome {
+                InstanceFrameOutcome::Completion(name) => {self.completed_levels.insert(name);},
+                InstanceFrameOutcome::Bail => self.current_instance = None,
+                InstanceFrameOutcome::Travel(dest) => self.current_instance = Some(Instance::new(self.level_repository.get_level(dest).unwrap().instance())),
+                InstanceFrameOutcome::None => {},
             }
         } else {
             let tiles = vec![Tile::Snow, Tile::Ice, Tile::Wall, Tile::Wall];
-            let entities = vec![Entity::Player, Entity::Crate, Entity::Present, Entity::Receptacle];
+            let entities = vec![Entity::Player, Entity::Crate, Entity::Present, Entity::Receptacle, Entity::Tree, Entity::Portal(self.place_tokens, self.place_link.clone())];
 
             let pane_rect = inputs.screen_rect.child(0., 0.00, 1.0, 0.92);
             let term_rect = inputs.screen_rect.child(0., 0.92, 1.0, 0.08);
@@ -75,7 +86,7 @@ impl Session {
             let level_pane = pane_rect.fit_aspect_ratio(self.current_level.aspect().max(2.0)).fit_aspect_ratio(self.current_level.aspect());
             rc.push(RenderCommand::solid_rect(level_pane, Vec4::new(1.0, 0.0, 0.0, 1.0), 1.0));
             let level_rect = level_pane.dilate_pc(-0.04);
-            self.current_level.render(level_rect, rc);
+            self.current_level.render(level_rect, rc, self.completed_levels.len() as i32);
 
             for i in 0..self.current_level.w {
                 for j in 0..self.current_level.h {
@@ -98,13 +109,13 @@ impl Session {
                             rc.push(RenderCommand {
                                 colour: Vec4::new(1.0, 1.0, 1.0, 0.5),
                                 pos: hover_rect,
-                                sprite_clip: entity_clip(entities[sel]),
+                                sprite_clip: entity_clip(&entities[sel]),
                                 depth: 4.0,
                             });
                         }
                         if hover_rect.contains(inputs.mouse_pos) && (inputs.lmb == KeyStatus::Pressed || inputs.lmb == KeyStatus::JustPressed) {
                             if !self.current_level.entities.iter().any(|(e, ii, ij)| *e == entities[sel] && i == *ii && j == *ij) {
-                                self.current_level.entities.push((entities[sel], i, j));
+                                self.current_level.entities.push((entities[sel].clone(), i, j));
                             }
                         }
                     }
@@ -165,17 +176,32 @@ impl Session {
                         VirtualKeyCode::Return => {
                             // feedback is gonna be important esp wrt overwriting
                             // save vs saveas vs overwrite
+                            // play should autosave
                             if !self.terminal_str.is_empty() {
                                 if self.terminal_str.starts_with("open ") && self.terminal_str.split(" ").count() == 2 {
                                     let level_name = self.terminal_str.split(" ").nth(1).unwrap().to_owned();
-                                    self.current_level = self.level_repository.get_level(level_name).unwrap_or(Level::new_empty());
+                                    self.current_level = self.level_repository.get_level(level_name.clone()).unwrap_or(Level::new_empty(level_name));
+                                }
+                                if self.terminal_str.starts_with("link ") && self.terminal_str.split(" ").count() == 2 {
+                                    let arg = self.terminal_str.split(" ").nth(1).unwrap().to_owned();
+                                    self.place_link = arg;
+                                }
+                                if self.terminal_str.starts_with("tokens ") && self.terminal_str.split(" ").count() == 2 {
+                                    let arg = self.terminal_str.split(" ").nth(1).unwrap().to_owned();
+                                    if let Ok(num) = arg.parse::<u32>() {
+                                        self.place_tokens = num as i32;
+                                    }
                                 }
                                 if self.terminal_str.starts_with("save ") && self.terminal_str.split(" ").count() == 2 {
                                     let level_name = self.terminal_str.split(" ").nth(1).unwrap().to_owned();
+                                    self.current_level.title = level_name.clone();
                                     self.level_repository.save_level(level_name, self.name.clone(), self.current_level.clone());
                                 }
                                 if self.terminal_str.starts_with("list") && self.terminal_str.split(" ").count() == 1 {
                                     self.level_repository.print_levels();
+                                }
+                                if self.terminal_str.starts_with("rp") && self.terminal_str.split(" ").count() == 1 {
+                                    self.completed_levels = HashSet::new();
                                 }
                                 if self.terminal_str.starts_with("dims ") && self.terminal_str.split(" ").count() == 3 {
                                     if let Ok(new_w) = self.terminal_str.split(" ").nth(1).unwrap().parse::<u32>() {
@@ -285,9 +311,9 @@ impl Session {
                 let left_bot = left_pane.child(0.0, 0.5, 1.0, 0.5);
                 let entity_pane = left_bot.fit_center_square();
                 for i in 0..2 {
-                    for j in 0..2 {
+                    for j in 0..3 {
                         let entity_idx = (j * 2 + i) as usize;
-                        let curr_entity_pane = entity_pane.grid_child(i, j, 2, 2);
+                        let curr_entity_pane = entity_pane.grid_child(i, j, 2, 3);
                         let entity_rect = curr_entity_pane.dilate_pc(-0.04);
                         if entity_rect.contains(inputs.mouse_pos) && (inputs.lmb == KeyStatus::Pressed || inputs.lmb == KeyStatus::JustPressed) {
                             self.entity_selection = Some(entity_idx);
@@ -299,7 +325,7 @@ impl Session {
                         rc.push(RenderCommand {
                             colour: Vec4::new(1.0, 1.0, 1.0, 1.0),
                             pos: entity_rect,
-                            sprite_clip: entity_clip(entities[entity_idx]),
+                            sprite_clip: entity_clip(&entities[entity_idx]),
                             depth: 2.0,
                         });
                     }
