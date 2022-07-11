@@ -26,6 +26,11 @@ pub fn gradient(t: f32, colours: Vec<(Vec3, f32)>) -> Vec3 {
     Vec3::new(1.0, 1.0, 1.0)
 }
 
+// t 0..1
+pub fn smoothstep(t: f32) -> f32 {
+    t * t * (3. - 2. * t)
+}
+
 /***************************************************
  * RNG
  ***************************************************/
@@ -43,6 +48,12 @@ pub fn krand(seed: u32) -> f32 {
 
 pub fn kuniform(seed: u32, min: f32, max: f32) -> f32 {
     min + (khash(seed) as f32 / 4294967295.0) * (max - min)
+}
+// smoothstep fn is what
+pub fn noise1d(t: f32, seed: u32) -> f32 {
+    let hstart = kuniform(seed + 489172373 * t.floor() as u32, 0.0, 1.0);
+    let hend = kuniform(seed + 489172373 * (t.floor() + 1.0) as u32, 0.0, 1.0);
+    lerp(hstart, hend, smoothstep(t.fract()))
 }
 
 /***************************************************

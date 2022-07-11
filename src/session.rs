@@ -68,7 +68,7 @@ impl Session {
         if let Some(ci) = &mut self.current_instance {
             // esc back to edit mode
 
-            let outcome = ci.frame(inputs, rc, self.completed_levels.len() as i32);
+            let outcome = ci.frame(inputs, rc, self.completed_levels.len() as i32, inputs.t as f32);
             println!("outcome: {:?}", outcome);
             match outcome {
                 InstanceFrameOutcome::Completion(name) => {self.completed_levels.insert(name);},
@@ -86,7 +86,7 @@ impl Session {
             let level_pane = pane_rect.fit_aspect_ratio(self.current_level.aspect().max(2.0)).fit_aspect_ratio(self.current_level.aspect());
             rc.push(RenderCommand::solid_rect(level_pane, Vec4::new(1.0, 0.0, 0.0, 1.0), 1.0));
             let level_rect = level_pane.dilate_pc(-0.04);
-            self.current_level.render(level_rect, rc, self.completed_levels.len() as i32);
+            self.current_level.render(level_rect, rc, self.completed_levels.len() as i32, 0.0);
 
             for i in 0..self.current_level.w {
                 for j in 0..self.current_level.h {

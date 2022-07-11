@@ -160,8 +160,8 @@ impl Level {
         })
     }
 
-    pub fn render(&self, level_rect: Rect, rc: &mut Vec<RenderCommand>, num_tokens: i32) {
-        render(level_rect, rc, self.w, self.h, &self.tiles, &self.entities, num_tokens)
+    pub fn render(&self, level_rect: Rect, rc: &mut Vec<RenderCommand>, num_tokens: i32, t: f32) {
+        render(level_rect, rc, self.w, self.h, &self.tiles, &self.entities, num_tokens, t)
     }
 
     pub fn aspect(&self) -> f32 {
@@ -278,12 +278,12 @@ impl LevelInstance {
         Level::victorious(self.l.w, self.l.h, &self.l.tiles, &self.current_entities)
     }
 
-    pub fn render(&self, level_rect: Rect, rc: &mut Vec<RenderCommand>, num_tokens: i32) {
-        render(level_rect, rc, self.l.w, self.l.h, &self.l.tiles, &self.current_entities, num_tokens)
+    pub fn render(&self, level_rect: Rect, rc: &mut Vec<RenderCommand>, num_tokens: i32, t: f32) {
+        render(level_rect, rc, self.l.w, self.l.h, &self.l.tiles, &self.current_entities, num_tokens, t)
     }
 }
 
-fn render(level_rect: Rect, rc: &mut Vec<RenderCommand>, w: i32, h: i32, tiles: &[Tile], entities: &[(Entity, i32, i32)], num_tokens: i32) {
+fn render(level_rect: Rect, rc: &mut Vec<RenderCommand>, w: i32, h: i32, tiles: &[Tile], entities: &[(Entity, i32, i32)], num_tokens: i32, t: f32) {
     for i in 0..w {
         for j in 0..h {
             rc.push(RenderCommand {
@@ -326,15 +326,40 @@ fn render(level_rect: Rect, rc: &mut Vec<RenderCommand>, w: i32, h: i32, tiles: 
                     let mut h = 0.8;
                     let mut rect = portal_rect;
                     let mut depth = 1.2;
-                    for i in 0..6 {
+                    for x in 0..6 {
                         rc.push(RenderCommand::solid_rect(rect, colour, depth));
-                        rect = rect.child(0.1, 0.1, w, h);
+                        let cx = remap(noise1d(t/4., 123 * *i as u32 + *j as u32 + x * 237621), 0., 1., 0., 1.-w);
+                        let cy = remap(noise1d(t/4., 456 * *i as u32 + *j as u32 + x * 981241), 0., 1., 0., 1.-h);
+                        rect = rect.child(cx, cy, w, h);
                         w *= 0.95;
                         h *= 0.95;
                         depth += 0.1;
                         colour = colour.lerp(final_colour, 0.1);
                     }
                 }
+            },
+            Entity::Player => {
+
+                // can rc even flip sprites
+                // rc is shid lol
+
+                if (t*0.5) % 1.0 < 0.5 {
+                    rc.push(RenderCommand {
+                        colour: Vec4::new(1.0, 1.0, 1.0, 1.0),
+                        sprite_clip: entity_clip(e),
+                        pos: tile_rect,
+                        depth: 2.,
+                    });    
+                } else {
+                    rc.push(RenderCommand {
+                        colour: Vec4::new(1.0, 1.0, 1.0, 1.0),
+                        sprite_clip: Rect::new(4.0, 1.0, 1.0, 1.0),
+                        pos: tile_rect,
+                        depth: 2.,
+                    });    
+                }
+
+
             },
             Entity::Tree => {
                 rc.push(RenderCommand {

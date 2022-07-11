@@ -6,6 +6,7 @@ mod level;
 mod instance;
 mod world;
 mod session;
+mod snow;
 mod level_repository;
 
 use application::*;

@@ -1153,6 +1153,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b8de496cf83d4ed58b6be86c3a275b8602f6ffe98d3024a869e124147a9a3ac"
 
 [[package]]
+name = "skrs"
+version = "0.1.0"
+dependencies = [
+ "assert_hex",
+ "chrono",
+ "glow",
+ "glutin",
+ "itertools",
+ "ordered-float",
+ "palette",
+ "png",
+ "serde",
+ "serde_json",
+ "winit",
+]
+
+[[package]]
 name = "slotmap"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1201,23 +1218,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-xid",
-]
-
-[[package]]
-name = "test"
-version = "0.1.0"
-dependencies = [
- "assert_hex",
- "chrono",
- "glow",
- "glutin",
- "itertools",
- "ordered-float",
- "palette",
- "png",
- "serde",
- "serde_json",
- "winit",
 ]
 
 [[package]]

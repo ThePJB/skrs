@@ -25,7 +25,7 @@ impl Instance {
         }
     }
 
-    pub fn frame(&mut self, inputs: &FrameInputState, rc: &mut Vec<RenderCommand>, num_tokens: i32) -> InstanceFrameOutcome {
+    pub fn frame(&mut self, inputs: &FrameInputState, rc: &mut Vec<RenderCommand>, num_tokens: i32, t: f32) -> InstanceFrameOutcome {
         if inputs.just_pressed(VirtualKeyCode::W) || inputs.just_pressed(VirtualKeyCode::Up) {
             self.level.try_move((0, -1));
         }
@@ -44,7 +44,7 @@ impl Instance {
 
         // draw level
         let level_rect = inputs.screen_rect.fit_aspect_ratio(self.level.l.w as f32 / self.level.l.h as f32);
-        self.level.render(level_rect, rc, num_tokens);
+        self.level.render(level_rect, rc, num_tokens, t);
         
         // Handle possible outcomes
         for (e1, i1, j1) in self.level.current_entities.iter() {
