@@ -10,6 +10,7 @@ use crate::level_repository::LevelRepository;
 use crate::level_repository::levels_path;
 use crate::renderer::*;
 use crate::manifest::*;
+use crate::terminal::*;
 use crate::lib::kinput::*;
 use crate::lib::kmath::*;
 
@@ -28,9 +29,7 @@ pub struct Session {
     tile_selection: Option<usize>,
     entity_selection: Option<usize>,
 
-    terminal_history: Vec<String>,
-    terminal_str: String,
-    history_idx: Option<i32>,
+    terminal: Terminal,
 
     place_tokens: i32,
     place_link: String,
@@ -55,9 +54,7 @@ impl Session {
             tile_selection: None,
             entity_selection: None,
 
-            terminal_history: Vec::new(),
-            terminal_str: "".to_owned(),
-            history_idx: None,
+            terminal: Terminal::new(),
 
             place_tokens: 0,
             place_link: "void".to_owned(),
@@ -65,15 +62,18 @@ impl Session {
     }
 
     pub fn frame(&mut self, inputs: &FrameInputState, rc: &mut Vec<RenderCommand>) {
+        rc.push(RenderCommand::solid_rect(inputs.screen_rect, Vec4::new(0.0, 0.0, 0.0, 1.0), 1.0));
         if let Some(ci) = &mut self.current_instance {
             // esc back to edit mode
 
             let outcome = ci.frame(inputs, rc, self.completed_levels.len() as i32, inputs.t as f32);
-            println!("outcome: {:?}", outcome);
+            if outcome != InstanceFrameOutcome::None {
+                println!("outcome: {:?}", outcome);
+            }
             match outcome {
                 InstanceFrameOutcome::Completion(name) => {self.completed_levels.insert(name);},
                 InstanceFrameOutcome::Bail => self.current_instance = None,
-                InstanceFrameOutcome::Travel(dest) => self.current_instance = Some(Instance::new(self.level_repository.get_level(dest).unwrap().instance())),
+                InstanceFrameOutcome::Travel(dest) => self.current_instance = Some(Instance::new(self.level_repository.get_level(&dest).unwrap().instance())),
                 InstanceFrameOutcome::None => {},
             }
         } else {
@@ -125,159 +125,71 @@ impl Session {
                 }
             }
 
-            {   // terminal
-                // wants an edit method so that on edit we reset the history idx
-                let edit = |c, s: &mut String, h: &mut Option<i32>| {
-                    s.push(c);
-                    *h = None;
-                };
-                rc.push(RenderCommand::solid_rect(term_rect, Vec4::new(0.2, 0.2, 0.2, 1.0), 2.0));
-                for keystroke in inputs.keys_pressed_this_frame.iter() {
-                    match keystroke {
-                        VirtualKeyCode::Q => edit('q', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::W => edit('w', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::E => edit('e', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::R => edit('r', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::T => edit('t', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Y => edit('y', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::U => edit('u', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::I => edit('i', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::O => edit('o', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::P => edit('p', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::A => edit('a', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::S => edit('s', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::D => edit('d', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::F => edit('f', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::G => edit('g', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::H => edit('h', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::J => edit('j', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::K => edit('k', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::L => edit('l', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Z => edit('z', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::X => edit('x', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::C => edit('c', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::V => edit('v', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::B => edit('b', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::N => edit('n', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::M => edit('m', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Space => edit(' ', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key1 => edit('1', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key2 => edit('2', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key3 => edit('3', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key4 => edit('4', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key5 => edit('5', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key6 => edit('6', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key7 => edit('7', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key8 => edit('8', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key9 => edit('9', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Key0 => edit('0', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Minus => edit('-', &mut self.terminal_str, &mut self.history_idx),
-                        VirtualKeyCode::Tab => {},// try autocomplete
-                        VirtualKeyCode::Return => {
-                            // feedback is gonna be important esp wrt overwriting
-                            // save vs saveas vs overwrite
-                            // play should autosave
-                            if !self.terminal_str.is_empty() {
-                                if self.terminal_str.starts_with("open ") && self.terminal_str.split(" ").count() == 2 {
-                                    let level_name = self.terminal_str.split(" ").nth(1).unwrap().to_owned();
-                                    self.current_level = self.level_repository.get_level(level_name.clone()).unwrap_or(Level::new_empty(level_name));
-                                }
-                                if self.terminal_str.starts_with("link ") && self.terminal_str.split(" ").count() == 2 {
-                                    let arg = self.terminal_str.split(" ").nth(1).unwrap().to_owned();
-                                    self.place_link = arg;
-                                }
-                                if self.terminal_str.starts_with("tokens ") && self.terminal_str.split(" ").count() == 2 {
-                                    let arg = self.terminal_str.split(" ").nth(1).unwrap().to_owned();
-                                    if let Ok(num) = arg.parse::<u32>() {
-                                        self.place_tokens = num as i32;
-                                    }
-                                }
-                                if self.terminal_str.starts_with("save ") && self.terminal_str.split(" ").count() == 2 {
-                                    let level_name = self.terminal_str.split(" ").nth(1).unwrap().to_owned();
-                                    self.current_level.title = level_name.clone();
-                                    self.level_repository.save_level(level_name, self.name.clone(), self.current_level.clone());
-                                }
-                                if self.terminal_str.starts_with("list") && self.terminal_str.split(" ").count() == 1 {
-                                    self.level_repository.print_levels();
-                                }
-                                if self.terminal_str.starts_with("rp") && self.terminal_str.split(" ").count() == 1 {
-                                    self.completed_levels = HashSet::new();
-                                }
-                                if self.terminal_str.starts_with("dims ") && self.terminal_str.split(" ").count() == 3 {
-                                    if let Ok(new_w) = self.terminal_str.split(" ").nth(1).unwrap().parse::<u32>() {
-                                        if let Ok(new_h) = self.terminal_str.split(" ").nth(2).unwrap().parse::<u32>() {
-                                            // change dims and copy over tiles
-                                            let (old_w, old_h) = (self.current_level.w, self.current_level.h);
-                                            self.current_level.w = new_w as i32;
-                                            self.current_level.h = new_h as i32;
-                                            let old_tiles = self.current_level.tiles.clone();
-                                            self.current_level.tiles = vec![Tile::Wall; (new_w * new_h) as usize];
-                                            for i in 0..old_w {
-                                                for j in 0..old_h {
-                                                    if i < self.current_level.w as i32 && j < self.current_level.h as i32 {
-                                                        self.current_level.tiles[(j * self.current_level.w + i) as usize] = old_tiles[(j * old_w + i) as usize];
-                                                    }
-                                                }
-                                            }
-                                            // protect against stupid big
-                                            // o shit oob entities
-                                        }
-                                    }
-                                }
+            let right_pane = Rect::new(level_pane.right(), 0.0, level_pane.x, inputs.screen_rect.h);
 
-                                // if list
-                                // if dims etc...
-
-
-                                self.terminal_history.push(self.terminal_str.clone());
-                                self.terminal_str = "".to_owned();
+            {   
+                if let Some(cmd) = self.terminal.frame(inputs, rc, right_pane) {
+                    match cmd {
+                        TerminalCommand::New(name) => {
+                            if self.level_repository.contains_level(&name) {
+                                println!("level {} already exists", name);
+                            } else {
+                                self.current_level = Level::new_empty(name);
                             }
                         },
-                        VirtualKeyCode::Back => {
-                            if !self.terminal_str.is_empty() {
-                                self.terminal_str.pop();
+                        TerminalCommand::Load(name) => {
+                            if let Some(existing) = self.level_repository.get_level(&name) {
+                                self.current_level = existing;
+                            } else {
+                                println!("level {} not found", name);
                             }
                         },
-                        // yeah desired up/down arrow key behaviour looks like spaghetti but it is what you want intuitively
-                        VirtualKeyCode::Up => {
-                            if let Some(idx) = self.history_idx {
-                                // already in history
-                                self.history_idx = Some((idx + 1).min((self.terminal_history.len() - 1) as i32));
-                                self.terminal_str = self.terminal_history[self.terminal_history.len() - 1 - self.history_idx.unwrap() as usize].clone();
-                            } else {
-                                if self.terminal_history.len() !=  0 {
-                                    if !self.terminal_str.is_empty() {
-                                        self.terminal_history.push(self.terminal_str.clone());
+                        TerminalCommand::Save => {
+                            self.level_repository.save_level(self.current_level.title.clone(), self.name.clone(), self.current_level.clone());
+                        },
+                        TerminalCommand::Play => {
+                            self.level_repository.save_level(self.current_level.title.clone(), self.name.clone(), self.current_level.clone());
+                            self.current_instance = Some(Instance::new(self.current_level.instance()));
+                            // maybe check theres a player, an objective, etc
+                        },
+                        TerminalCommand::Reset => {
+                            self.completed_levels = HashSet::new();
+                        },
+                        TerminalCommand::List => {
+                            let mut level_names: Vec<String> = self.level_repository.data.keys().map(|x| x.clone()).collect();
+                            level_names.sort();
+                            for name in level_names {
+                                let mut line = name.clone();
+                                line.insert(0, ' ');
+                                line.insert(0, ' ');
+                                self.terminal.tprint(line);
+                            }
+                        },
+                        TerminalCommand::Link(arg) => {
+                            self.place_link = arg;
+                        },
+                        TerminalCommand::Tokens(arg) => {
+                            self.place_tokens = arg as i32;
+                        },
+                        TerminalCommand::Dims(new_w, new_h) => {
+                            let (old_w, old_h) = (self.current_level.w, self.current_level.h);
+                            self.current_level.w = new_w as i32;
+                            self.current_level.h = new_h as i32;
+                            let old_tiles = self.current_level.tiles.clone();
+                            self.current_level.tiles = vec![Tile::Wall; (new_w * new_h) as usize];
+                            for i in 0..old_w {
+                                for j in 0..old_h {
+                                    if i < self.current_level.w as i32 && j < self.current_level.h as i32 {
+                                        self.current_level.tiles[(j * self.current_level.w + i) as usize] = old_tiles[(j * old_w + i) as usize];
                                     }
-                                    self.history_idx = Some(0.min((self.terminal_history.len() - 1) as i32));
-                                    self.terminal_str = self.terminal_history[self.terminal_history.len() - 1 - self.history_idx.unwrap() as usize].clone();
                                 }
                             }
-                        }
-                        VirtualKeyCode::Down => {
-                            if let Some(idx) = self.history_idx {
-                                if self.history_idx == Some(0) {
-                                    self.history_idx = None;
-                                    self.terminal_str = "".to_owned();
-                                } else {
-                                    self.history_idx = Some((idx - 1).max(0));
-                                    self.terminal_str = self.terminal_history[self.terminal_history.len() - 1 - self.history_idx.unwrap() as usize].clone();
-                                }
-                            } else {
-                                if !self.terminal_str.is_empty() {
-                                    self.terminal_history.push(self.terminal_str.clone());
-                                    self.terminal_str = "".to_owned();
-                                }
-                            }
-                        }
-                        _ => {},
+                            // ensure entities dont go out of bounds
+                            self.current_level.entities.retain(|(e, x, y)| *x < self.current_level.w && *y < self.current_level.h);
+                        },
                     }
                 }
-                let mut render_str = self.terminal_str.clone();
-                if (inputs.t/ 2.0) % 1.0 > 0.5 {
-                    render_str.push('_');
-                };
-                render_text_left(render_str.as_bytes(), term_rect.dilate_pc(-0.005), 2.5, rc);
+                
             }
 
 
@@ -332,15 +244,15 @@ impl Session {
                 }
             }
 
-            let right_pane = Rect::new(level_pane.right(), 0.0, level_pane.x, inputs.screen_rect.h);
-            let play = right_pane.grid_child(0, 0, 1, 5);
-            rc.push(RenderCommand::solid_rect(play, Vec4::new(0.3, 0.3, 0.3, 1.0), 1.5));
+
+            // let play = right_pane.grid_child(0, 0, 1, 5);
+            // rc.push(RenderCommand::solid_rect(play, Vec4::new(0.3, 0.3, 0.3, 1.0), 1.5));
             
-            let text_rect = play.dilate_pc(-0.3);
-            render_text_center(b"play", text_rect, 3.0, rc);
-            if play.contains(inputs.mouse_pos) && inputs.lmb == KeyStatus::JustPressed {
-                self.current_instance = Some(Instance::new(self.current_level.instance()));
-            }
+            // let text_rect = play.dilate_pc(-0.3);
+            // render_text_center(b"play", text_rect, 3.0, rc);
+            // if play.contains(inputs.mouse_pos) && inputs.lmb == KeyStatus::JustPressed {
+            //     self.current_instance = Some(Instance::new(self.current_level.instance()));
+            // }
             // edit mode
             // draw editing controls, modify current_level
             // if they save we save it to level repository etc
@@ -348,6 +260,7 @@ impl Session {
 
 
         }
+        println!("rc len: {}", rc.len());
 
     }
 }

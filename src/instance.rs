@@ -8,9 +8,10 @@ use crate::lib::kmath::*;
 // gameplay instance
 pub struct Instance {
     pub level: LevelInstance,
+    pub complete: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum InstanceFrameOutcome {
     Completion(String),
     Travel(String),
@@ -22,6 +23,7 @@ impl Instance {
     pub fn new(level_instance: LevelInstance) -> Instance {
         Instance {
             level: level_instance,
+            complete: false,
         }
     }
 
@@ -61,7 +63,8 @@ impl Instance {
                 }
             }
         }
-        if self.level.victorious() {
+        if self.level.victorious() && !self.complete {
+            self.complete = true;
             return InstanceFrameOutcome::Completion(self.level.l.title.clone());
         }
         if inputs.just_pressed(VirtualKeyCode::Escape) {

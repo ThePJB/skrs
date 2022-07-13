@@ -12,7 +12,7 @@ pub const levels_path: &str = "./levels.dat";
 
 #[derive(Serialize, Deserialize)]
 pub struct LevelRepository {
-    data: HashMap<String, LevelMetadata>,
+    pub data: HashMap<String, LevelMetadata>,
 }
 
 impl LevelRepository {
@@ -30,11 +30,11 @@ impl LevelRepository {
             data: HashMap::new(),
         }
     }
-    pub fn contains_level(&self, name: String) -> bool{
-        self.data.contains_key(&name)
+    pub fn contains_level(&self, name: &String) -> bool{
+        self.data.contains_key(name)
     }
-    pub fn get_level(&self, name: String) -> Option<Level> {
-        self.data.get(&name).map(|x| x.level.clone())
+    pub fn get_level(&self, name: &String) -> Option<Level> {
+        self.data.get(name).map(|x| x.level.clone())
     }
     pub fn save_level(&mut self, name: String, creator: String, level: Level) {
         let date: String = chrono::offset::Local::now().to_string();

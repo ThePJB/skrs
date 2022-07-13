@@ -8,6 +8,7 @@ mod world;
 mod session;
 mod snow;
 mod level_repository;
+mod terminal;
 
 use application::*;
 use glutin::event::{Event, WindowEvent};

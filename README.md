@@ -1,46 +1,47 @@
 # SKRS
+I do wonder if renderer is bugged, like some carry over between frames
+works for garbage, needs to do like 'command not found'
+list doesnt clear?
 
-OK but yea anyway we've got play
-need to return from play to wherever we were
-save, load
 
-lool "notice of achievement"
+probably need to sort transparent geometry. it is sorted. why is it so fucked up?
+terminal needs outputs etc
 
-we could just go linked list style with next pointers as portals
-or we could go hub style, hub better if people get stuck
-do we want always to have portal back if its hub style?
+dont close without savings
 
-could have trees we can walk under but not push block under!
-and able to be pow'd, leaving stump
+maybe it would be good if levels had a UUID and coming out of terminal it got checked and UUIDs were always valid
+or I could just terminal_print from main that it not valid
+yea actually terminal no can access
+
+terminal no clear sometimes
+
+I think cmds should be
+ * new X
+ * load X
+ * save
+ * play [autosaves]
+and probably indicate there are unsaved changes like in the window title
+
+literally going to spin on level structure forever, maybe just a menu
+maybe make the portals better though, like indicate what it is. You can express different things like elaboration.
+
+way back to editor from ingame?
+
+god damn move that terminal code somewhere
+can it return an enum?
+
+pow crate
+tree pow
+
+hmm achievements or gates
+like it doesnt make any sense, achievements could be a pickup
+funny if the puzzle elements annihilated
+box wrapper
 
 definitely have portals gated by # achievements
-and i think linked list mode as desired form of expression e.g. 'im teaching you this'
-cool portal rendering will be good
 
-tbh fuck right menu, have terminal down the bottom
-   * play
-   * help
-   * list
-   * save <name>
-   * load <name>
-   * link <name>
-   * dims <w> <h>
+path block
 
-maybe session separate editor function
-and separate terminal function probably
-
-level repository save to disk
-
-
-next I guess we add portals and make levels!!
-and maybe tree and path and pow
-
-
-OK ive figured out structure of levels, worlds. have it be in engine constantly, global level registry, levels referenced by name
-drop into edit mode, load, save and test levels.
-
-
-maybe a subtle path block can be used for expression / hints? the path can lie lol. some environment might be appreciated
 
 
 * todo animation, more mechanics etc.
@@ -79,6 +80,7 @@ theorems
 
 
 bug: possession mode: would actually be a great puzzle mechanic. just have a bunch of things interacting
+kinda like baba is you but make it about jumping from thing to thing. maybe if you try and move into something you geist into it. cant go from somethings to other things
 
 
 bug: level titles need to line up
