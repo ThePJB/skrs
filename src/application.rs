@@ -149,7 +149,7 @@ unsafe fn opengl_boilerplate(xres: f32, yres: f32, event_loop: &glutin::event_lo
         .with_title("test")
         .with_inner_size(glutin::dpi::PhysicalSize::new(xres, yres));
     let window = glutin::ContextBuilder::new()
-        // .with_depth_buffer(0)
+        .with_depth_buffer(16)
         // .with_srgb(true)
         // .with_stencil_buffer(0)
         .with_vsync(true)
