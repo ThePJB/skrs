@@ -198,9 +198,7 @@ impl Terminal {
         if (inputs.t/ 2.0) % 1.0 > 0.5 {
             render_str.push('_');
         };
-        if inputs.keys_held.contains(&VirtualKeyCode::LControl) {
-            render_text_left(render_str.as_bytes(), line_rect.dilate_pc(-0.01), 2.5, rc);
-        }
+        render_text_left(render_str.as_bytes(), line_rect.dilate_pc(-0.01), 2.5, rc);
         
         return result;
     }

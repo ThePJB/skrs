@@ -80,8 +80,7 @@ impl Session {
             let tiles = vec![Tile::Snow, Tile::Ice, Tile::Wall, Tile::Wall];
             let entities = vec![Entity::Player, Entity::Crate, Entity::Present, Entity::Receptacle, Entity::Tree, Entity::Portal(self.place_tokens, self.place_link.clone())];
 
-            let pane_rect = inputs.screen_rect.child(0., 0.00, 1.0, 0.92);
-            let term_rect = inputs.screen_rect.child(0., 0.92, 1.0, 0.08);
+            let pane_rect = inputs.screen_rect;
 
             let level_pane = pane_rect.fit_aspect_ratio(self.current_level.aspect().max(2.0)).fit_aspect_ratio(self.current_level.aspect());
             rc.push(RenderCommand::solid_rect(level_pane, Vec4::new(1.0, 0.0, 0.0, 1.0), 1.0));
@@ -132,7 +131,7 @@ impl Session {
                     match cmd {
                         TerminalCommand::New(name) => {
                             if self.level_repository.contains_level(&name) {
-                                println!("level {} already exists", name);
+                                self.terminal.tprint(format!("level {} already exists", name));
                             } else {
                                 self.current_level = Level::new_empty(name);
                             }
@@ -141,7 +140,7 @@ impl Session {
                             if let Some(existing) = self.level_repository.get_level(&name) {
                                 self.current_level = existing;
                             } else {
-                                println!("level {} not found", name);
+                                self.terminal.tprint(format!("level {} not found", name));
                             }
                         },
                         TerminalCommand::Save => {
@@ -243,24 +242,6 @@ impl Session {
                     }
                 }
             }
-
-
-            // let play = right_pane.grid_child(0, 0, 1, 5);
-            // rc.push(RenderCommand::solid_rect(play, Vec4::new(0.3, 0.3, 0.3, 1.0), 1.5));
-            
-            // let text_rect = play.dilate_pc(-0.3);
-            // render_text_center(b"play", text_rect, 3.0, rc);
-            // if play.contains(inputs.mouse_pos) && inputs.lmb == KeyStatus::JustPressed {
-            //     self.current_instance = Some(Instance::new(self.current_level.instance()));
-            // }
-            // edit mode
-            // draw editing controls, modify current_level
-            // if they save we save it to level repository etc
-
-
-
         }
-        println!("rc len: {}", rc.len());
-
     }
 }
